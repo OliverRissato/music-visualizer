@@ -28,7 +28,7 @@ class Ball(object):
         @return         An instance of a ball class initialized
         """
 
-        ## The parent screen base class that it will be drawn
+        ## The parent screen base class where it will be drawn
         self._screen = screen 
 
         ## The radius of the ball
@@ -63,24 +63,28 @@ class Ball(object):
         pygame.draw.circle(self._screen, self._color , (self._xLoc - camera_offset[0],self._yLoc - camera_offset[1]), self._radius)
 
 
-    def update(self, xCollision, yCollision):
+    def update(self, xCollision, yCollision, dT):
         """! Function responsible to update the ball dinamics.
 
-        @param collision    Boolean flag with the collision status of the ball.
-
+        @param xCollision   Boolean flag with the collision status of the ball at X axis.
+        @param yCollision   Boolean flag with the collision status of the ball at Y axis.
+        @param dT           Time variable used to calculate the ball update in miliseconds.            
+        
         @return none
         """
-        self._xLoc += self._xVel
+        dT /= 1000
 
-        self._yVel += self.gravity
+        self._xLoc += self._xVel * dT
 
-        self._yLoc += self._yVel
+        self._yLoc = self._yLoc + self._yVel * dT + (self.gravity * dT * dT)/2
 
-        ## Bouncing interation
+        self._yVel += self.gravity * dT 
+
+        ## Bouncing interation. The ball looses 10% of the energy
         if  xCollision:
-            self._xVel *= -1
+            self._xVel *= -0.9
         if  yCollision:
-            self._yVel *= -1
+            self._yVel *= -0.9
 
 
     def setPosition(self, x=None, y=None):
@@ -127,3 +131,57 @@ class Ball(object):
 
         return self._xVel, self._yVel
     
+
+
+"""
+    Script for quick behavioral and visual testing of the platform.
+    Draws a ball in the center that falls over the screen.
+"""
+if __name__ == "__main__":    
+    # Initializing Pygame
+    pygame.init()
+
+    # Initializing surface
+    screen = pygame.display.set_mode((1000,1000))
+
+    # Initializing platform (in the center of the screen)
+    x = pygame.display.Info().current_w//2
+    y = pygame.display.Info().current_h//2
+    ball = Ball(screen, 15, (0, 0, 0), x, y, 1000)
+
+    # Initializing camera
+    cam = (0,0) 
+
+    # Used to manage how fast the screen updates
+    clock = pygame.time.Clock()
+    last_tick = pygame.time.get_ticks()
+
+    # Loop until the user clicks the close button.
+    done = False
+
+    # Main program loop
+    while not done:
+
+        # Main event loop
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                done = True
+
+        # Updating the object dynamics
+        ball.update(False, False, pygame.time.get_ticks() - last_tick)
+        last_tick = pygame.time.get_ticks()
+
+        # Filling the screen
+        screen.fill((255, 255, 255))  
+
+        # Draw the ball on the screen
+        ball.draw(cam)
+
+        # Updating the screen
+        pygame.display.flip()
+
+        # Limit to 60 frames per second
+        clock.tick(60)
+
+# Close the window and quit.
+pygame.quit()
