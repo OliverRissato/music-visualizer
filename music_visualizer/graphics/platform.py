@@ -46,6 +46,11 @@ class Platform(object):
         self._color = color
 
     def draw(self, camera_offset):
+        """! Function responsible to draw the platform at the screen.
+        @param camera_offset    A touple containing the actual position of the camera. 
+            
+        @return none
+        """
         # calculating top left (p) corner and platform side dimensions (l) 
         p = (self._x-self._length/2 - camera_offset[0], self._y-self._width/2 - camera_offset[1])
         l = (self._length, self._width)
